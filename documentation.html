@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disco Organ Documentation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            border-left: 4px solid #3498db;
+            padding-left: 10px;
+            margin-top: 40px;
+        }
+        code, pre {
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            padding: 15px;
+            overflow-x: auto;
+        }
+        .section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .back-button {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .back-button:hover {
+            background-color: #2980b9;
+        }
+        .grade {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Disco Organ Documentation</h1>
+    
+    <a href="index.html" class="back-button">← Back to Visualizer</a>
+    
+    <div class="section">
+        <h2>II. Audio Effect Nodes</h2>
+        <p>Two audio effect nodes were added to the audio routing graph to enhance the audio experience:</p>
+        
+        <h3>1. Bass Filter (Low Shelf)</h3>
+        <p>A <code>BiquadFilterNode</code> was implemented as a low shelf filter to boost or cut bass frequencies:</p>
+        <pre>
+// Create bass filter
+bassFilter = audioCtx.createBiquadFilter();
+bassFilter.type = "lowshelf";
+bassFilter.frequency.value = DEFAULTS.bassFrequency; // 100Hz
+bassFilter.gain.value = 0;
+        </pre>
+        <p>This filter allows users to adjust the low frequency response of the audio, enhancing the bass content when set to positive values or reducing it when set to negative values. The cutoff frequency is set at 100Hz, which targets the typical range for bass sounds.</p>
+        
+        <h3>2. Treble Filter (High Shelf)</h3>
+        <p>Another <code>BiquadFilterNode</code> was implemented as a high shelf filter to boost or cut treble frequencies:</p>
+        <pre>
+// Create treble filter
+trebleFilter = audioCtx.createBiquadFilter();
+trebleFilter.type = "highshelf";
+trebleFilter.frequency.value = DEFAULTS.trebleFrequency; // 3000Hz
+trebleFilter.gain.value = 0;
+        </pre>
+        <p>This filter allows users to adjust the high frequency response, enhancing the treble content when set to positive values or reducing it when set to negative values. The cutoff frequency is set at 3000Hz, which targets the typical range for treble sounds.</p>
+        
+        <p>Both filters are connected in series in the audio graph, with the bass filter preceding the treble filter:</p>
+        <pre>
+// Connect the nodes - we now have an audio graph
+sourceNode.connect(analyserNode);
+analyserNode.connect(bassFilter);
+bassFilter.connect(trebleFilter);
+trebleFilter.connect(gainNode);
+gainNode.connect(audioCtx.destination);
+        </pre>
+        <p>These filters are controlled via UI sliders that allow users to adjust the gain values from -20 to +20 decibels, giving users fine control over the audio's tonal characteristics.</p>
+    </div>
+    
+    <div class="section">
+        <h2>III. Sprite Implementation</h2>
+        <p>The visualization uses a layered approach with image-based sprites rather than traditional animated sprites. The main sprite system is implemented in the <code>drawImageLayer</code> function that handles the visualization:</p>
+        
+        <pre>
+const drawImageLayer = (sprite, x, y, scale = 1, opacity = 1, filter = 'none') => {
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Apply opacity and saturation filter
+    ctx.globalAlpha = opacity;
+    ctx.filter = filter;
+
+    for (let key in sprite) {
+        let img = sprite[key];
+        if (img.complete && img.naturalWidth > 0) {
+            // Calculate the scaled width and height
+            let w = img.naturalWidth * scale;
+            let h = img.naturalHeight * scale;
+            ctx.drawImage(img, -w / 2, -h / 2, w, h);
+        }
+    }
+
+    ctx.restore();
+};
+        </pre>
+        
+        <p>The visualization also includes an <code>AnimatedSprite</code> class that can be used for sprite animation, although it's currently commented out in the active code:</p>
+        
+        <pre>
+class AnimatedSprite {
+    constructor(image, frameWidth, frameHeight, row, totalFrames, frameSpeed) {
+        this.image = image;
+        this.frameWidth = frameWidth;
+        this.frameHeight = frameHeight;
+        this.row = row;
+        this.totalFrames = totalFrames;
+        this.frameSpeed = frameSpeed; // lower is faster
+        this.currentFrame = 0;
+        this.frameTimer = 0;
+
+        // center position
+        this.x = canvas.width / 2;
+        this.y = canvas.height / 2;
+    }
+
+    update() {
+        this.frameTimer++;
+        if (this.frameTimer >= this.frameSpeed) {
+            this.frameTimer = 0;
+            this.currentFrame = (this.currentFrame + 1) % this.totalFrames;
+        }
+    }
+
+    draw(ctx) {
+        ctx.drawImage(
+            this.image,
+            this.currentFrame * this.frameWidth,  // source x
+            this.row * this.frameHeight,          // source y
+            this.frameWidth,                      // source width
+            this.frameHeight,                     // source height
+            this.x - this.frameWidth / 2,         // draw center x
+            this.y - this.frameHeight / 2,        // draw center y
+            this.frameWidth,                      // draw width
+            this.frameHeight                      // draw height
+        );
+    }
+}
+        </pre>
+        
+        <p>The visualization itself is a "Light Organ" that uses layered PNG images that react to different frequency bands of the audio. These layers scale, change opacity, and adjust saturation based on audio intensity, creating a dynamic visual representation of the music.</p>
+    </div>
+    
+    <div class="section">
+        <h2>IV. Application Data in av-data.json</h2>
+        <p>The <code>av-data.json</code> file contains configuration data for the application, including:</p>
+        
+        <pre>
+{
+    "title": "Disco Organ",
+    "tracks": [
+      {
+        "file": "media/Everyday.mp3",
+        "name": "Everyday"
+      },
+      {
+        "file": "media/Black Sand.mp3",
+        "name": "Black Sand"
+      },
+      {
+        "file": "media/Ozan Koukle.mp3",
+        "name": "Ozan Koukle"
+      },
+      {
+        "file": "media/The Afterparty.mp3",
+        "name": "The Afterparty"
+      },
+      {
+        "file": "media/Peanuts Theme.mp3",
+        "name": "Peanuts Theme"
+      },
+      {
+        "file": "media/The Picard Song.mp3",
+        "name": "The Picard Song"
+      }
+    ],
+    "instructions": "Come groove! Choose a track from the dropdown or upload your own using the upload option. Adjust the volume, bass, and treble sliders to customize the sound. Toggle visual effects using the checkboxes in the controls menu for a unique audio visualization experience."
+  }
+        </pre>
+        
+        <p>This JSON data includes:</p>
+        <ul>
+            <li><strong>Title:</strong> "Disco Organ" - The name of the application that appears in the browser title and page heading</li>
+            <li><strong>Tracks:</strong> An array of track objects, each containing:
+                <ul>
+                    <li><strong>file:</strong> Path to the audio file</li>
+                    <li><strong>name:</strong> Display name for the track in the selection dropdown</li>
+                </ul>
+            </li>
+            <li><strong>Instructions:</strong> Text explaining how to use the application, which is displayed to the user</li>
+        </ul>
+        
+        <p>This data-driven approach allows for easy modification of the application's content without having to modify the JavaScript code. The tracks list can be updated by simply editing the JSON file, and the UI will automatically reflect these changes when the application loads.</p>
+    </div>
+    
+    <div class="section">
+        <h2>V. Aesthetic Improvements</h2>
+        <p>The Disco Organ visualizer has been aesthetically enhanced in several ways compared to the previous homework version:</p>
+        
+        <ol>
+            <li><strong>Light Organ Visualization:</strong> Implemented a multi-layered "light organ" visualization that uses PNG layers that react to different frequency bands, creating a more professional and cohesive visual experience.</li>
+            
+            <li><strong>Draggable Controls Panel:</strong> Added a draggable controls panel that can be toggled on/off, improving the user interface by keeping controls accessible but not taking up screen space when not needed.</li>
+            
+            <li><strong>Audio Upload Functionality:</strong> Added the ability for users to upload their own audio tracks, enhancing the interactive experience and personalization options.</li>
+            
+            <li><strong>Audio Effect Controls:</strong> Added bass and treble control sliders that provide users with more control over the audio playback, creating a more engaging experience.</li>
+            
+            <li><strong>Dynamic Visualization Responsiveness:</strong> Improved the visualization's responsiveness to audio frequencies by splitting the audio data into bass, mid, and treble ranges, each affecting different aspects of the visualization.</li>
+            
+            <li><strong>JSON-Driven Configuration:</strong> Moved configuration to a JSON file for easier maintenance and updates, including track lists and application instructions.</li>
+            
+            <li><strong>Clean UI Design:</strong> The overall UI has been improved with better organization, more intuitive controls, and clearer instructions for users.</li>
+        </ol>
+        
+        <h3>Self-Evaluation Grade: <span class="grade">12%</span></h3>
+        
+        <p>The application represents a significant improvement over the previous homework version, with enhanced visual effects, better audio processing, and improved user interaction. The light organ visualization provides a unique and engaging experience that responds well to different types of music.</p>
+        
+        <p>The improvements go beyond the basic requirements by implementing multiple audio effect nodes, a sophisticated visualization system, and user-friendly controls. However, there's still room for further refinement in terms of visual polish and additional interactive features that would make it truly portfolio-worthy, which is why I've assigned a grade of 12% rather than the full 15%.</p>
+        
+        <p>Future improvements could include:</p>
+        <ul>
+            <li>More visualization options or themes</li>
+            <li>Additional audio effects</li>
+            <li>Enhanced mobile support</li>
+            <li>Preset configurations for different musical genres</li>
+            <li>Ability to save and share visualizations</li>
+        </ul>
+    </div>
+
+    <!-- Add this section to your existing documentation.html file -->
+<div class="section">
+    <h2>VI. Visualization Type Toggle</h2>
+    <p>The application now offers two distinct visualization modes that users can toggle between:</p>
+    
+    <h3>1. Frequency Domain Visualization (Light Organ)</h3>
+    <p>This is the original visualization that uses the frequency data obtained via <code>analyserNode.getByteFrequencyData()</code>. It splits the frequency spectrum into bass, mid, and treble ranges and uses these to animate different layers of the light organ visualization.</p>
+    
+    <pre>
+// Get frequency data
+analyserNode.getByteFrequencyData(audioData);
+
+// Split frequency data into low (bass), mid, and high (treble)
+let bass = audioData.slice(0, audioData.length / 3);
+let mid = audioData.slice(audioData.length / 3, (2 * audioData.length) / 3);
+let treble = audioData.slice((2 * audioData.length) / 3);
+    </pre>
+    
+    <p>This visualization focuses on showing the energy distribution across different frequency bands, making it excellent for visualizing the tonal characteristics of music.</p>
+    
+    <h3>2. Time Domain Visualization (Waveform)</h3>
+    <p>The newly added time domain visualization uses <code>analyserNode.getByteTimeDomainData()</code> to obtain waveform data. This data represents the actual audio waveform over time:</p>
+    
+    <pre>
+// Get time domain data
+analyserNode.getByteTimeDomainData(timeData);
+    </pre>
+    
+    <p>The waveform visualization draws the audio signal as a continuous line that moves up and down according to the amplitude of the sound at each moment. This provides a different perspective on the audio, focusing on its temporal structure rather than its frequency content.</p>
+    
+    <p>The time domain visualization includes:</p>
+    <ul>
+        <li>A colorful gradient waveform that changes colors from red at the top to blue at the bottom</li>
+        <li>Dynamic scaling based on the audio level</li>
+        <li>Glow effects that intensify with audio amplitude</li>
+        <li>Background elements from the light organ visualization for visual continuity</li>
+    </ul>
+    
+    <h3>Toggle Implementation</h3>
+    <p>Users can switch between these two visualization types using radio buttons in the controls panel. The implementation includes:</p>
+    
+    <ol>
+        <li>A <code>setVisualizationType()</code> function in the canvas module that updates the current visualization mode</li>
+        <li>Radio buttons added dynamically to the controls panel</li>
+        <li>Event listeners that call <code>setVisualizationType()</code> when the user changes the selection</li>
+        <li>Separate drawing functions for each visualization type</li>
+        <li>Updated JSON configuration to include visualization type information</li>
+    </ol>
+    
+    <p>This feature enhances the application by providing users with different ways to visualize and experience their music, catering to different preferences and allowing users to see both the frequency characteristics and temporal structure of the audio.</p>
+</div>
+    
+    <a href="index.html" class="back-button">← Back to Visualizer</a>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{
+    "title": "Disco Organ",
+    "tracks": [
+      {
+        "file": "media/Everyday.mp3",
+        "name": "Everyday"
+      },
+      {
+        "file": "media/Black Sand.mp3",
+        "name": "Black Sand"
+      },
+      {
+        "file": "media/Ozan Koukle.mp3",
+        "name": "Ozan Koukle"
+      },
+      {
+        "file": "media/The Afterparty.mp3",
+        "name": "The Afterparty"
+      },
+      {
+        "file": "media/Peanuts Theme.mp3",
+        "name": "Peanuts Theme"
+      },
+      {
+        "file": "media/The Picard Song.mp3",
+        "name": "The Picard Song"
+      }
+    ],
+    "visualizationTypes": [
+      {
+        "type": "frequency",
+        "name": "Light Organ (Frequency)"
+      },
+      {
+        "type": "time",
+        "name": "Waveform (Time Domain)"
+      }
+    ],
+    "instructions": "Come groove! Choose a track from the dropdown or upload your own using the upload option. Adjust the volume, bass, and treble sliders to customize the sound. Switch between Frequency (Light Organ) and Time Domain (Waveform) visualizations for different visual experiences."
+}
+  

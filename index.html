@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Disco Organ</title>
+  <link href="./styles/default-styles.css" type="text/css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amaranth:ital,wght@0,400;0,700;1,400;1,700&family=Barlow+Semi+Condensed:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Bebas+Neue&family=Fascinate&family=Fugaz+One&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lalezar&family=Major+Mono+Display&family=Monoton&family=Passion+One:wght@400;700;900&family=Rowdies:wght@300;400;700&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+<script src="./src/loader.js" type="module"></script>
+</head>
+<body>
+  <nav>
+    <div class="logo">Disco Organ</div>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li>
+        <a href="#" id="settings-toggle">Controls</a>
+        <div id="settings-dropdown" class="dropdown">
+
+          <div id="controls">
+
+            <section>
+              <button id="btn-play" data-playing="no"></button>
+              <label>Track: 
+                <select id="select-track">
+                  <option value="media/Everyday.mp3" selected>Everyday</option>
+                  <option value="media/Black Sand.mp3">Black Sand</option>
+                  <option value="media/Ozan Koukle.mp3">Ozan Koukle</option>
+                  <option value="media/The Afterparty.mp3">The Afterparty</option>
+                  <option value="media/New Adventure Theme.mp3">New Adventure Theme</option>
+                  <option value="media/Peanuts Theme.mp3">Peanuts Theme</option>
+                  <option value="media/The Picard Song.mp3">The Picard Song</option>
+
+                </select>
+              </label>
+            </section>
+
+            <section>
+              <label for="upload-track">Upload Your Own Track:</label>
+              <input type="file" id="upload-track" accept="audio/*">
+            </section>
+            
+            
+            <section>
+              Volume: <input type="range" id="slider-volume" min="0" max="2" value="1" step="0.01">
+              <span id="label-volume">???</span>
+            </section>
+      
+            <section>
+              Bass: <input type="range" id="slider-bass" min="-30" max="30" value="0" step="1">
+              <span id="label-bass">0</span>
+            </section>
+            
+            <section>
+              Treble: <input type="range" id="slider-treble" min="-30" max="30" value="0" step="1">
+              <span id="label-treble">0</span>
+            </section>
+      
+            <!-- <section>
+              <span><input type="checkbox" id="cb-gradient" checked><label for="cb-gradient">Show Gradient</label></span>
+              <span><input type="checkbox" id="cb-bars" checked><label for="cb-bars">Show Bars</label></span>
+              <span><input type="checkbox" id="cb-circles" checked><label for="cb-circles">Show Circles</label></span>
+              <span><input type="checkbox" id="cb-noise"><label for="cb-noise">Show Noise</label></span>
+              <span><input type="checkbox" id="cb-invert"><label for="cb-invert">Invert Colors</label></span>
+              <span><input type="checkbox" id="cb-emboss"><label for="cb-emboss">Show Emboss</label></span>
+            </section> -->
+          </div>
+        </div>
+      </li>
+      <li><a href="#" id="btn-fs">Fullscreen</a></li>
+      <li><a href="./documentation.html">About</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <canvas id="visualizer" width="1280" height="1024"></canvas>
+  </main>
+
+  <p id="instructions"></p>
+
+</html>
